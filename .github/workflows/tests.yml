@@ -23,6 +23,6 @@ jobs:
       - name: run tests
         shell: pwsh
         run: |
-          start-job -ScriptBlock {./elasticsearch-7.15.1/bin/elasticsearch} 
+          ./elasticsearch-7.15.1/bin/elasticsearch
           start-sleep 30
           python3 ./baseline-category-prediction/index-datasets.py
