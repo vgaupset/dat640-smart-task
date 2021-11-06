@@ -2,7 +2,6 @@ from typing import List
 import json
 from elasticsearch import Elasticsearch
 
-INDEX_NAME = "smart-task"
 INDEX_SETTINGS = {
     "mappings": {
         "properties": {
@@ -26,14 +25,14 @@ def load_data(path: str) -> List[dict]:
     f.close()
     return data
 
-def reset_index(es: Elasticsearch) -> None:
+def reset_index(es: Elasticsearch, index_name: str) -> None:
     """Clears index"""
-    if es.indices.exists(INDEX_NAME):
-        es.indices.delete(index=INDEX_NAME)
+    if es.indices.exists(index_name):
+        es.indices.delete(index=index_name)
 
-    es.indices.create(index=INDEX_NAME, body=INDEX_SETTINGS)
+    es.indices.create(index=index_name, body=INDEX_SETTINGS)
 
-def bulk_index(es: Elasticsearch, questions: List[str]) -> None:
+def bulk_index(es: Elasticsearch, questions: List[str], index_name: str) -> None:
     """Iterate over questions and index
 
     Args:
@@ -50,15 +49,19 @@ def bulk_index(es: Elasticsearch, questions: List[str]) -> None:
         }
         if indexed_questions % 100 == 0:
             print("{} percent done".format(i/num_of_questions*100))
-        es.index(index=INDEX_NAME, doc_type="_doc", id=question['id'], body=body)
+        es.index(index=index_name, doc_type="_doc", id=question['id'], body=body)
         indexed_questions += 1
     print("{} questions indexed.".format(indexed_questions))
 
 
 if __name__ == '__main__':
-    train_questions = load_data("./smart-dataset/datasets/DBpedia/smarttask_dbpedia_train.json")    
     es = Elasticsearch()
     print(es.info())
 
-    reset_index(es)
-    bulk_index(es, train_questions)
+    train_questions = load_data("./smart-dataset/datasets/DBpedia/smarttask_dbpedia_train.json")
+    reset_index(es, "smart-task-train")
+    bulk_index(es, train_questions, "smart-task-train")
+    
+    test_questions = load_data("./smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json")
+    reset_index(es, "smart-task-test")
+    bulk_index(es, test_questions, "smart-task-test")
