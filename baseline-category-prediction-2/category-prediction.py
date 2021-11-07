@@ -16,8 +16,11 @@ QUESTION_WORDS = [
     "in",
     "is",
     "where",
-    "name"
+    "name",
+    "does",
+    "from"
 ]
+
 def load_categories(path: str) -> List[dict]:
     """Load categories with doc ids for smarttask
 
@@ -34,8 +37,11 @@ def load_categories(path: str) -> List[dict]:
     for object in json.load(f):
         if object['question']:
             doc_ids.append(object['id'])
-            categories.append(object['category'])
             questions.append(object['question'])
+            if object['category'] == "literal":
+                categories.append("{}-{}".format(object['category'], object['type'][0]))
+            else:
+                categories.append(object['category'])
     f.close()
     return doc_ids, categories, questions
 
@@ -94,10 +100,12 @@ def get_feature_vector(doc: List[str], vocabulary):
     for term in doc:
         if term in vocabulary:
             feature_vector[vocabulary.index(term)] = doc.count(term)
+ 
     if doc and len(doc) > 0 and doc[0] in QUESTION_WORDS:
-        feature_vector.append(QUESTION_WORDS.index(doc[0]))
+        feature_vector.append(QUESTION_WORDS.index(doc[0]) + 1)
     else:
         feature_vector.append(0)
+
     return feature_vector
 
 
@@ -109,6 +117,30 @@ def get_feature_vectors(docs, vocabulary: List[str]):
 def train(X, y):
     return RandomForestClassifier().fit(X, y)
 
+def dump_results(ids, questions, actual, predicted):
+    result = []
+    for i in range(len(ids)):
+        result.append({
+            'id': ids[i],
+            'question': questions[i],
+            'actual_category': actual[i],
+            'predicted_category': predicted[i]
+        })
+    with open('./result.json','w+') as f:
+        json.dump(result,f)
+
+def dump_deviations(ids, questions, actual, predicted):
+    deviations = []
+    for i in range(len(ids)):
+        if actual[i] != predicted[i]:
+            deviations.append({
+                'id': ids[i],
+                'question': questions[i],
+                'actual_category': actual[i],
+                'predicted_category': predicted[i]
+            })
+    with open('./deviations.json','w+') as f:
+        json.dump(deviations,f)
 
 def evaluate(actual: List[str], predicted: List[str]):
     length = len(actual)
@@ -129,11 +161,10 @@ if __name__ == '__main__':
     print("Preprocessing...")
     processed_train_docs = preprocess_multiple(train_docs)
     processed_test_docs = preprocess_multiple(test_docs)
-    print(processed_train_docs[0])
-    print(len(processed_test_docs))
 
     print("Getting vocabulary...")
     vocabulary = load_vocabulary(processed_train_docs)
+
     print("Getting feature vectors...")
     train_feature_vectors = get_feature_vectors(
         processed_train_docs, vocabulary)
@@ -145,7 +176,8 @@ if __name__ == '__main__':
     print("Applying model on test data...")
     predicted_categories = classifier.predict(test_feature_vectors)
 
-    print("Evaluating")
+    print("Evaluating...")
     precision = evaluate(test_categories, predicted_categories)
-
     print(f"Precision:\t{precision}")
+    print('Dumping deviations...')
+    dump_deviations(test_doc_ids, test_docs, test_categories, predicted_categories)
