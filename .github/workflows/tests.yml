@@ -1,0 +1,15 @@
+on:
+  workflow_dispatch:
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - run: |
+          pip install sklearn
+      - name: run tests
+        run: python3 ./baseline-category-prediction-2/category-prediction.py
