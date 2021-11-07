@@ -1,8 +1,5 @@
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "test-workflow"
 jobs:
   tests:
     name: Tests
@@ -13,16 +10,6 @@ jobs:
         with:
           python-version: '3.x'
       - run: |
-          pip install Elasticsearch
-      - name: Install Elastic Search
-        run: |
-          wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.15.1-darwin-x86_64.tar.gz
-          wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.15.1-darwin-x86_64.tar.gz.sha512
-          shasum -a 512 -c elasticsearch-7.15.1-darwin-x86_64.tar.gz.sha512 
-          tar -xzf elasticsearch-7.15.1-darwin-x86_64.tar.gz
+          pip install sklearn
       - name: run tests
-        shell: pwsh
-        run: |
-          ./elasticsearch-7.15.1/bin/elasticsearch
-          start-sleep 30
-          python3 ./baseline-category-prediction/index-datasets.py
+        run: python3 ./baseline-category-prediction-2/category-prediction.py
