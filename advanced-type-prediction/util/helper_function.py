@@ -43,11 +43,18 @@ def preprocess(doc: str) -> str:
     return doc.lower()
 
 
+class Indexer:
+    def __init__(self,index: str,index_settings:dict, reset=True):
+        #self._filepath = filepath
+        self.dictionary = {}     
+        self.index = index
+        self.index_settings= index_settings
+        es = Elasticsearch()
+        es.info()
+        self.es = es
+        if reset:
+            self.reset_index()
 
-class indexer:
-    def __init__(self,filename):
-        self._filename = filename
-        self._dictionary = {}
     
     def preprocess(self, doc: str) -> str:
         """Preprocesses text to prepare it for feature extraction.
@@ -67,9 +74,27 @@ class indexer:
             doc = doc.replace(c, " ")
         return doc.lower()
 
-    def reset_index(es: Elasticsearch, index_name: str, index_settings) -> None:
+    def reset_index(self) -> None:
         """Clears index"""
-        if es.indices.exists(index_name):
-            es.indices.delete(index=index_name)
+        if self.es.indices.exists(self.index):
+            self.es.indices.delete(index=self.index)
 
-        es.indices.create(index=index_name, body=index_settings)
+        self.es.indices.create(index=self.index, body=self.index_settings)
+    
+    def bulk_index(self,data) -> None:
+        """Indexes documents from JSONL file."""
+        bulk_data = []
+        for item in data:
+            bulk_data.append(
+                {"index": {"_index": self.index, "_id": item.pop("id")}}
+            )
+            bulk_data.append(item)
+        self.es.bulk(index=self.index, body=bulk_data, refresh=True)
+    
+    def check_esIndex_count(self)->int:
+        self.es.indices.refresh(self.index)
+        count = self.es.cat.count(self.index, params={"format": "json"})
+        return int(count[0]["count"])
+
+    def check_esIndex_content(self, id:str):
+        return self.es.get(index=self.index, id=id)
