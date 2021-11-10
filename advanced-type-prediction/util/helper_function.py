@@ -41,7 +41,8 @@ def preprocess(doc: str) -> str:
     # Replace punctuation marks (including hyphens) with spaces.
     for c in string.punctuation:
         doc = doc.replace(c, " ")
-    return doc.lower()
+    #return doc.lower()
+    return doc
 
 def analyze_query(
     es: Elasticsearch, query: str, field: str, index: str = "toy_index"

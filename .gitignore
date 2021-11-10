@@ -1,4 +1,12 @@
 .ipynb_checkpoints/
+__pycache__
 test.txt
 googleNews.d2v
 googleNews.d2v.vectors.npy
+
+instance_types_en.ttl
+short_abstracts_en.ttl
+
+DBpedia_map_type_entities-Copy1.ipynb
+xaa
+xaa_small_abs
