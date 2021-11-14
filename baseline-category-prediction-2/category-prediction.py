@@ -33,7 +33,7 @@ def load_categories(path: str) -> List[dict]:
     doc_ids = []
     categories = []
     questions = []
-    f = open(path,)
+    f = open(path, errors="ignore")
     for object in json.load(f):
         if object['question']:
             doc_ids.append(object['id'])
@@ -50,7 +50,10 @@ def preprocess(doc: str):
     special_chars = [",", ".", ":", ";", "?", "!",
                      "\"", "\\", "_", "<", ">", "(", ")", "/", "@", "{", "}"]
     for char in special_chars:
-        doc = doc.replace(char, ' ')
+        try:
+            doc = doc.replace(char, ' ')
+        except:
+            print(doc)
     return [word for word in doc.lower().split()]
 
 
@@ -153,11 +156,28 @@ def evaluate(actual: List[str], predicted: List[str]):
 
 if __name__ == '__main__':
 
-    train_doc_ids, train_categories, train_docs = load_categories(
+
+    train_doc_ids_dbpedia, train_categories_dbpedia, train_docs_dbpedia = load_categories(
         "./smart-dataset/datasets/DBpedia/smarttask_dbpedia_train.json")
-    test_doc_ids, test_categories, test_docs = load_categories(
+    print("get 1...")
+
+    train_doc_ids_wikidata, train_categories_wikidata, train_docs_wikidata = load_categories(
+        "./smart-dataset/datasets/Wikidata/lcquad2_anstype_wikidata_train.json")
+    print("getc 2")
+
+    train_doc_ids, train_categories, train_docs = train_doc_ids_dbpedia + train_doc_ids_wikidata, train_categories_dbpedia + train_categories_wikidata, train_docs_dbpedia + train_docs_wikidata
+
+    test_doc_ids_dbpedia, test_categories_dbpedia, test_docs_dbpedia = load_categories(
         "./smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json")
-    
+    print("get 3")
+
+    test_doc_ids_wikidata, test_categories_wikidata, test_docs_wikidata = load_categories(
+        "./smart-dataset/datasets/Wikidata/lcquad2_anstype_wikidata_test_gold.json")
+    print("get4")
+
+    test_doc_ids, test_categories, test_docs = test_doc_ids_dbpedia + test_doc_ids_wikidata, test_categories_dbpedia + test_categories_wikidata, test_docs_dbpedia + test_docs_wikidata
+
+
     print("Preprocessing...")
     processed_train_docs = preprocess_multiple(train_docs)
     processed_test_docs = preprocess_multiple(test_docs)
