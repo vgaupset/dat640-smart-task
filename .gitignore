@@ -23,3 +23,4 @@ test_DBpedia_map_type_entities.json
 
 extracted_features
 project_report
+ElasticSearch_map_type_docID.json
