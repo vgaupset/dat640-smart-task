@@ -127,10 +127,14 @@ def map_docID_DBOtype(es=Elasticsearch(),index="dbpdiea_type_centric")->Dict:
 
 
 def extract_features_11to12(dp_type:str, question:str,docID_DBOtype_dict:Dict,es = Elasticsearch(),index="dbpdiea_type_centric",smoothing_param=2000,k1=1.2,b=0.75,mode="Dirichlet")->Dict:
+    if not es.indices.exists(index):
+        print(f'you need to index "dbpdiea_type_centric" dataset to elasticSearch')
+        return None
     doc_id=docID_DBOtype_dict.get(dp_type,"not found")
     if doc_id=="not found" :
         print("type not found in elasticSearch")
-        return 0
+        return {"TCBM25_t_q": 0,
+                "TCLM_t_q": 0}
     field="abstract"
     return {"TCBM25_t_q": scorer_BM25(es, doc_id,question,index,field,k1,b),
             "TCLM_t_q": scorer_LM(es, doc_id,question,index,field,smoothing_param,mode)}
@@ -159,7 +163,7 @@ if __name__ == '__main__':
     index="dbpdiea_type_centric"
     dp_type="dbo:Place"
     question="When was Bibi Andersson married to Per Ahlmark very green?"
-    print(extract_features_11to12(dp_type, question,docID_DBOtype_dict))
+    print(extract_features_11to12(dp_type, question,docID_DBOtype_dict,es = Elasticsearch(),index="dbpdiea_type"))
     
     #test with small dataset, to check the implementation is correct or not
     query="t3"

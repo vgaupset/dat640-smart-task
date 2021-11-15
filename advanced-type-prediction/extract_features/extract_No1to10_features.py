@@ -14,6 +14,9 @@ import math,json
 
 
 def extract_features_1to5(DBpedia_map_type_entities:Dict,dp_type:str,query:str,k_list=[5,10,20,50,100],es = Elasticsearch(),index="dbpedia_entity_centric")-> Dict[str, float]:
+    if not es.indices.exists(index):
+        print(f'you need to index "dbpedia_entity_centric" dataset to elasticSearch')
+        return None
     ECBM25_t_q={}
     for k in k_list:
         hits = es.search(index=index, q=query, _source=True, size=k )["hits"]["hits"]  
