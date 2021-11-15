@@ -120,7 +120,7 @@ def map_docID_DBOtype(es=Elasticsearch(),index="dbpdiea_type_centric")->Dict:
         print(f'No items exist in {index}')
         return None
   
-    return {es.get(index=INDEX_NAME, id=str(i))['_source']["type"]:str(i) for i in range(len_indexed)}
+    return {es.get(index=index, id=str(i))['_source']["type"]:str(i) for i in range(len_indexed)}
 
 
 # In[8]:
@@ -150,20 +150,28 @@ if __name__ == '__main__':
     print("--count",int(count[0]["count"]))
 
 
-    # *if you run this script for the first time, please uncomment the following lines*
-    #docID_DBOtype_dict=map_docID_DBOtype() 
-    # filepath="../data/ElasticSearch_map_type_docID.json"
-    # with open(filepath, 'w',encoding='utf-8') as f:
-    #     json.dump(docID_DBOtype_dict, f, ensure_ascii=False)
     
-    filepath="../data/ElasticSearch_map_type_docID.json"
-    with open(filepath, 'r',encoding='utf-8') as f:
-        docID_DBOtype_dict = json.load(f)
-    print("------length:",len(docID_DBOtype_dict))
+    try:
+        filepath="../data/ElasticSearch_map_type_docID.json"
+        with open(filepath, 'r',encoding='utf-8') as f:
+            docID_DBOtype_dict = json.load(f)
+        print("------length:",len(docID_DBOtype_dict))
+    except:
+        docID_DBOtype_dict=map_docID_DBOtype() 
+        filepath="../data/ElasticSearch_map_type_docID.json"
+        with open(filepath, 'w',encoding='utf-8') as f:
+            json.dump(docID_DBOtype_dict, f, ensure_ascii=False)
+        print("'test_ElasticSearch_map_type_docID.json' has been created")
+            
+        filepath="../data/ElasticSearch_map_type_docID.json"
+        with open(filepath, 'r',encoding='utf-8') as f:
+            docID_DBOtype_dict = json.load(f)
+        print("------length:",len(docID_DBOtype_dict))
+    
     index="dbpdiea_type_centric"
     dp_type="dbo:Place"
     question="When was Bibi Andersson married to Per Ahlmark very green?"
-    print(extract_features_11to12(dp_type, question,docID_DBOtype_dict,es = Elasticsearch(),index="dbpdiea_type"))
+    print(extract_features_11to12(dp_type, question,docID_DBOtype_dict))
     
     #test with small dataset, to check the implementation is correct or not
     query="t3"
