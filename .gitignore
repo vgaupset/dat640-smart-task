@@ -29,4 +29,5 @@ test_DBpedia_map_entity_abstract.ipynb
 test_DBpedia_map_type_entities.ipynb
 test.ipynb
 
-advanced-type-prediction/util/index_DBpedia_type_centric-Copy1.ipynb
+index_DBpedia_type_centric-Copy1.ipynb
+index_DBpedia_entity-centric-Copy1.ipynb
