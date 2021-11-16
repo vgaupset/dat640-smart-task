@@ -136,8 +136,8 @@ def extract_features_11to12(dp_type:str, question:str,docID_DBOtype_dict:Dict,es
         return {"TCBM25_t_q": 0,
                 "TCLM_t_q": 0}
     field="abstract"
-    return {"TCBM25_t_q": scorer_BM25(es, doc_id,question,index,field,k1,b),
-            "TCLM_t_q": scorer_LM(es, doc_id,question,index,field,smoothing_param,mode)}
+    return {"TCBM25_t_q": round(scorer_BM25(es, doc_id,question,index,field,k1,b),4),
+            "TCLM_t_q": round(scorer_LM(es, doc_id,question,index,field,smoothing_param,mode),4)}
 
 
 # In[11]:

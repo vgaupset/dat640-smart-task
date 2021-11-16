@@ -133,17 +133,18 @@ FEATURES_15="SIBLINGS_t"
 
 
 def extract_features_13to15(typeobj:TypeTaxonomy,dp_type:str)-> Dict[str, float]:
-    dp_types=list(typeobj._types.keys())
-    SIBLINGS=[item for item in dp_types if typeobj.depth(item)==typeobj.depth(dp_type) and item!=dp_type]
+    # dp_types=list(typeobj._types.keys())
+    # SIBLINGS=[item for item in dp_types if typeobj.depth(item)==typeobj.depth(dp_type) and item!=dp_type]
+    parent=typeobj.parent(dp_type)
+    sibling_len=len(typeobj.children(parent))
     return {"DEPTH_t":round(typeobj.depth(dp_type)/typeobj.max_depth(),3),
            "CHILDREN_t":len(typeobj.children(dp_type)),
-           "SIBLINGS_t":len(SIBLINGS)}
+           "SIBLINGS_t":sibling_len}
 
 
 # In[6]:
 
 if __name__ == '__main__':
     typeobj=TypeTaxonomy("../data/dbpedia_types.tsv")
-    #typeobj._types
     print(extract_features_13to15(typeobj,"dbo:MilitaryPerson"))
 

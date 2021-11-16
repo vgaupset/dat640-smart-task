@@ -15,15 +15,11 @@ nltk.download('averaged_perceptron_tagger')
 # In[2]:
 
 
-# with open('../data/training_types.json',encoding='utf-8') as json_file:
-#     data = json.load(json_file)
-
-
 # In[3]:
 
 
 def jaccard_similarity(setA:Set, setB:Set)->float:
-    union_sets=intesects=setA.union(setB)
+    union_sets=setA.union(setB)
     inter_sets=setA.intersection(setB)
     return len(inter_sets)/len(union_sets)
 
@@ -41,12 +37,11 @@ def produce_nGram_terms(nGram:int, sentence:str)->set:
 # In[5]:
 
 
-def convert_DBOtype_toSet(dp_type:str)->set:
+def split_DBOtype(dp_type:str)->set:
     dp_type=dp_type[len("dbo:"):]
     splitted_type=re.findall('[A-Z][a-z]*', dp_type)
     joined_type= " ".join(splitted_type).lower()
-    #print(joined_type)
-    return set([joined_type])
+    return joined_type
 
 
 # In[7]:
@@ -70,21 +65,22 @@ def extract_features_20to22(dp_type:str, question:str)->Tuple[float,float,float]
     question_1_gram=produce_nGram_terms(1,question)
     question_2_gram=produce_nGram_terms(2,question)
     question_nouns=get_nouns(question)
-    dp_type_processed=convert_DBOtype_toSet(dp_type)
+    dp_type_processed=split_DBOtype(dp_type)
+ 
+    type_1_gram=produce_nGram_terms(1,dp_type_processed)
+    type_2_gram=produce_nGram_terms(2,dp_type_processed)
+    type_nouns=get_nouns(dp_type_processed)
     
-    feature20=jaccard_similarity(question_1_gram,dp_type_processed)
-    feature21=jaccard_similarity(question_2_gram,dp_type_processed)
-    feature22=jaccard_similarity(question_nouns,dp_type_processed)
-    return {"JTERMS1_t_q": feature20, "JTERMS2_t_q": feature21,"JNOUNS_t_q":feature22}
+    feature20=jaccard_similarity(question_1_gram,type_1_gram)
+    feature21=jaccard_similarity(question_2_gram,type_2_gram)
+    feature22=jaccard_similarity(question_nouns,type_nouns)
+    return {"JTERMS1_t_q": round(feature20,4), "JTERMS2_t_q": round(feature21,4),"JNOUNS_t_q":round(feature22,4)}
            
 
 
 # In[9]:
 
 if __name__ == '__main__':
-    dp_type="dbo:MusicFestival"
-    assert convert_DBOtype_toSet(dp_type)=={'music festival'}
-
     dp_type="dbo:MusicFestival"
     question="When was Bibi Andersson music festival married to Per Ahlmark very green?"
     print(extract_features_20to22(dp_type, question))

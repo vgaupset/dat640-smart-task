@@ -12,11 +12,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 # In[2]:
 
 
-import sys  
-#sys.path.insert(0, '../UTIL')
-#import helper_function
-#from helper_function import analyze_query, get_doc_term_freqs
-
 
 # In[3]:
 
@@ -28,12 +23,6 @@ FEATURES_19="IDFAVG_t"
 
 # In[4]:
 
-
-# vectorizer = CountVectorizer()
-# X = vectorizer.fit_transform(corpus)
-# X.toarray()
-# X.shape
-# np.sum(X[0,:])
 
 
 # In[5]:
@@ -57,9 +46,10 @@ def extract_features_17to19(data,dp_type:str,query:str)-> Dict[str, float]:
         else:
             idf.append(0)
     return {
-        "LENGTH_t":len(corpus[type_index].split()),
-        "IDFSUM_t":round(sum(idf),3),
-        "IDFAVG_t":round(sum(idf)/len(idf),3)
+        #"LENGTH_t":len(corpus[type_index].split()),
+        "LENGTH_t":len(dp_type),
+        "IDFSUM_t":round(sum(idf),4),
+        "IDFAVG_t":round(sum(idf)/len(idf),4)
     }  
 
 
@@ -71,7 +61,9 @@ if __name__ == '__main__':
         data = json.load(json_file)
         
     dp_type='dbo:MusicalWork'
-    features=extract_features_17to19(data,dp_type,query="Does the shelf life of spinach equal 8?")
+    dp_type="dbo:MusicFestival"
+    question="When was Bibi Andersson music festival married to Per Ahlmark very green?"
+    features=extract_features_17to19(data,dp_type,question)
     print(features)
 
 

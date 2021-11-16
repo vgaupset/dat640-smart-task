@@ -11,7 +11,6 @@ from gensim.models import Word2Vec
 import gensim
 import logging
 import numpy as np
-import os
 import nltk
 import re
 nltk.download('averaged_perceptron_tagger')
@@ -123,7 +122,7 @@ def find_nearest_similarities(model_loaded,words:List)->str:
     """
     vectors=[model_loaded[word] for word in words ]
     vectors_avg=np.mean(vectors,axis=0)
-    similarities=model_loaded.cosine_similarities(model_loaded["tree"],vectors)
+    similarities=model_loaded.cosine_similarities(vectors_avg,vectors)
     similarities=list(similarities)
     max_similarity=max(similarities)
     return words[similarities.index(max_similarity)]
@@ -161,10 +160,15 @@ def extract_features_23to25(model_loaded,dp_type:str, question:str, mode="Euclid
 # In[10]:
 
 if __name__ == '__main__':
-    model_loaded = api.load('word2vec-google-news-300')
     #https://stackoverflow.com/questions/57507832/unable-to-allocate-array-with-shape-and-data-type
-    # model_loaded.save('googleNews.d2v')
-    model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
+
+    try:
+        model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
+    except:
+        model_loaded = api.load('word2vec-google-news-300')
+        model_loaded.save('googleNews.d2v')
+        model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
+        
     dp_type="dbo:GreatMusicFestival"
     question="When was Bibi Andersson married to Per Ahlmark very green?"
     print(extract_features_23to25(model_loaded,dp_type, question))
