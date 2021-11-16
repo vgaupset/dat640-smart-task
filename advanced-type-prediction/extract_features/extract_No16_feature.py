@@ -11,8 +11,6 @@ from typing import Callable, Dict, List, Set, Tuple
 # In[ ]:
 
 
-FEATURES_16="LENGTH_t"
-
 
 # In[ ]:
 
