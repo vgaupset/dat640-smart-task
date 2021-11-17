@@ -98,7 +98,7 @@ def type_prediction(train_path, test_path, types_path, results_path):
     
     for i,id in enumerate(test_ids):
         id_index = real_test_ids.index(id)
-        test_data[id_index]['type'] = top_10_types[i][0]
+        test_data[id_index]['type'] = top_10_types[i][0]['type']
     print('Dumping results to "{}"...'.format(results_path))
     dump_results(test_data, results_path)
 
