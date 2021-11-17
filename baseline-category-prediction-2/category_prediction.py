@@ -1,3 +1,4 @@
+import types
 from typing import Any, Dict, List, Union
 import json
 import os
@@ -21,6 +22,7 @@ QUESTION_WORDS = [
     "from"
 ]
 
+
 def load_categories(path: str) -> List[dict]:
     """Load categories with doc ids for smarttask
 
@@ -39,7 +41,8 @@ def load_categories(path: str) -> List[dict]:
             doc_ids.append(object['id'])
             questions.append(object['question'])
             if object['category'] == "literal":
-                categories.append("{}-{}".format(object['category'], object['type'][0]))
+                categories.append(
+                    "{}-{}".format(object['category'], object['type'][0]))
             else:
                 categories.append(object['category'])
     f.close()
@@ -85,6 +88,7 @@ def get_vocabulary(docs: List[List[str]]):
         unique_terms.pop(unique_terms.index(term))
     return unique_terms
 
+
 def load_vocabulary(docs):
     if os.path.exists("./vocabulary.json"):
         f = open("./vocabulary.json",)
@@ -99,11 +103,11 @@ def load_vocabulary(docs):
 
 
 def get_feature_vector(doc: List[str], vocabulary):
-    feature_vector = [0] * len(vocabulary) 
+    feature_vector = [0] * len(vocabulary)
     for term in doc:
         if term in vocabulary:
             feature_vector[vocabulary.index(term)] = doc.count(term)
- 
+
     if doc and len(doc) > 0 and doc[0] in QUESTION_WORDS:
         feature_vector.append(QUESTION_WORDS.index(doc[0]) + 1)
     else:
@@ -116,21 +120,29 @@ def get_feature_vectors(docs, vocabulary: List[str]):
     return [get_feature_vector(doc, vocabulary) for doc in docs]
 
 
-
 def train(X, y):
     return RandomForestClassifier().fit(X, y)
 
-def dump_results(ids, questions, actual, predicted):
+
+def dump_category_results(ids, questions, predicted_categories, results_path = './category_results.json'):
     result = []
     for i in range(len(ids)):
+        type = []
+        category = predicted_categories[i]
+        if category == "boolean":
+            type = ["boolean"]
+        elif category in ["literal-string", "literal-date", "literal-number"]:
+            type = [category.split('-')[1]]
+            category = "literal"
         result.append({
             'id': ids[i],
             'question': questions[i],
-            'actual_category': actual[i],
-            'predicted_category': predicted[i]
+            'category': category,
+            'type': type
         })
-    with open('./result.json','w+') as f:
-        json.dump(result,f)
+    with open(results_path, 'w+') as f:
+        json.dump(result, f)
+
 
 def dump_deviations(ids, questions, actual, predicted):
     deviations = []
@@ -142,8 +154,9 @@ def dump_deviations(ids, questions, actual, predicted):
                 'actual_category': actual[i],
                 'predicted_category': predicted[i]
             })
-    with open('./deviations.json','w+') as f:
-        json.dump(deviations,f)
+    with open('./deviations.json', 'w+') as f:
+        json.dump(deviations, f)
+
 
 def evaluate(actual: List[str], predicted: List[str]):
     length = len(actual)
@@ -154,29 +167,23 @@ def evaluate(actual: List[str], predicted: List[str]):
     return no_correct/length
 
 
-if __name__ == '__main__':
+def load_categories_multiple(paths: List[str]):
+    doc_ids = []
+    categories = []
+    docs = []
+    for path in paths:
+        print(path)
+        temp_ids, temp_categories, temp_docs = load_categories(path)
+        doc_ids += temp_ids
+        categories += temp_categories
+        docs += temp_docs
+    return doc_ids, categories, docs
 
 
-    train_doc_ids_dbpedia, train_categories_dbpedia, train_docs_dbpedia = load_categories(
-        "./smart-dataset/datasets/DBpedia/smarttask_dbpedia_train.json")
-    print("get 1...")
-
-    train_doc_ids_wikidata, train_categories_wikidata, train_docs_wikidata = load_categories(
-        "./smart-dataset/datasets/Wikidata/lcquad2_anstype_wikidata_train.json")
-    print("getc 2")
-
-    train_doc_ids, train_categories, train_docs = train_doc_ids_dbpedia + train_doc_ids_wikidata, train_categories_dbpedia + train_categories_wikidata, train_docs_dbpedia + train_docs_wikidata
-
-    test_doc_ids_dbpedia, test_categories_dbpedia, test_docs_dbpedia = load_categories(
-        "./smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json")
-    print("get 3")
-
-    test_doc_ids_wikidata, test_categories_wikidata, test_docs_wikidata = load_categories(
-        "./smart-dataset/datasets/Wikidata/lcquad2_anstype_wikidata_test_gold.json")
-    print("get4")
-
-    test_doc_ids, test_categories, test_docs = test_doc_ids_dbpedia + test_doc_ids_wikidata, test_categories_dbpedia + test_categories_wikidata, test_docs_dbpedia + test_docs_wikidata
-
+def category_prediction(trainsets, testsets, results_path = './category_results.json'):
+    print("Loading data...")
+    train_doc_ids, train_categories, train_docs = load_categories_multiple(trainsets)
+    test_doc_ids, test_categories, test_docs = load_categories_multiple(testsets)
 
     print("Preprocessing...")
     processed_train_docs = preprocess_multiple(train_docs)
@@ -196,8 +203,17 @@ if __name__ == '__main__':
     print("Applying model on test data...")
     predicted_categories = classifier.predict(test_feature_vectors)
 
-    print("Evaluating...")
-    precision = evaluate(test_categories, predicted_categories)
-    print(f"Precision:\t{precision}")
-    print('Dumping deviations...')
-    dump_deviations(test_doc_ids, test_docs, test_categories, predicted_categories)
+    print('Dumping category results...')
+    dump_category_results(test_doc_ids, test_docs, predicted_categories, results_path)
+
+    return test_doc_ids, test_docs, predicted_categories
+
+
+if __name__ == '__main__':
+    category_prediction(
+        ["./smart-dataset/datasets/DBpedia/smarttask_dbpedia_train.json",
+         "./smart-dataset/datasets/Wikidata/lcquad2_anstype_wikidata_train.json"],
+        ["./smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json",
+         "./smart-dataset/datasets/Wikidata/lcquad2_anstype_wikidata_test_gold.json"]
+    )
+
