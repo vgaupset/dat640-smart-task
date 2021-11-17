@@ -13,7 +13,10 @@ import math,json
 # In[2]:
 
 
-def extract_features_1to5(DBpedia_map_type_entities:Dict,dp_type:str,query:str,k_list=[5,10,20,50,100],es = Elasticsearch(),index="dbpedia_entity_centric")-> Dict[str, float]:
+def extract_features_1to5(DBpedia_map_type_entities:Dict,dp_type:str,
+                          query:str,es:Elasticsearch,
+                          k_list=[5,10,20,50,100],index="dbpedia_entity_centric"
+                          )-> Dict[str, float]:
     if not es.indices.exists(index):
         print(f'you need to index "dbpedia_entity_centric" dataset to elasticSearch')
         return None
@@ -36,7 +39,8 @@ if __name__ == '__main__':
     print("------length:",len(DBpedia_map_type_entities))
     dp_type="dbo:Place"
     question="When was Bibi Andersson married to Per Ahlmark very green?"
-    scores=extract_features_1to5(DBpedia_map_type_entities,dp_type,question)
+    es= Elasticsearch()
+    scores=extract_features_1to5(DBpedia_map_type_entities,dp_type,question,es)
     print("------scores:",scores)
 
 

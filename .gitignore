@@ -17,9 +17,7 @@ DBpedia_map_type_abstract_withID.json
 DBpedia_map_type_abstract.json
 DBpedia_map_type_entities.json
 
-# test_DBpedia_map_entity_abstract.json
-# test_DBpedia_map_type_abstract.json
-# test_DBpedia_map_type_entities.json
+
 
 extracted_features
 project_report
@@ -31,3 +29,6 @@ test.ipynb
 
 index_DBpedia_type_centric-Copy1.ipynb
 index_DBpedia_entity-centric-Copy1.ipynb
+
+prepare_training_data-Copy1.ipynb
+advanced-type-prediction_no_run_file

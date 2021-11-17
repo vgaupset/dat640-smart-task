@@ -30,7 +30,7 @@ def get_query_term_count(term:str,query_terms:List)->int:
 # In[7]:
 
 
-def scorer_LM(es: Elasticsearch, doc_id:str,query:str,index: str,field="abstract",smoothing_param=2000,mode="Dirichlet")->float:
+def scorer_LM(es: Elasticsearch, doc_id:str,query:str,index: str,field="abstract",smoothing_param=2000)->float:
     query_terms=produce_nGram_terms(1,query)
      
     tv = es.termvectors(index=index, doc_type="_doc", id=doc_id, fields=field, term_statistics=True) 
@@ -59,10 +59,10 @@ def scorer_LM(es: Elasticsearch, doc_id:str,query:str,index: str,field="abstract
        
         if count_t_d==0 and P_t_givenC==0:
             continue
-        if mode=="Dirichlet":
-            term_score=count_t_q*math.log((count_t_d+smoothing_param*P_t_givenC)/(doc_len+smoothing_param))
-        if mode=="Jelinek-Mercer":
-            term_score=count_t_q*math.log((1-smoothing_param)*count_t_d/doc_len+smoothing_param*P_t_givenC)
+        #if mode=="Dirichlet":
+        term_score=count_t_q*math.log((count_t_d+smoothing_param*P_t_givenC)/(doc_len+smoothing_param))
+        # if mode=="Jelinek-Mercer":
+        #     term_score=count_t_q*math.log((1-smoothing_param)*count_t_d/doc_len+smoothing_param*P_t_givenC)
         doc_query_score+=term_score
             
         
@@ -126,7 +126,10 @@ def map_docID_DBOtype(es=Elasticsearch(),index="dbpdiea_type_centric")->Dict:
 # In[8]:
 
 
-def extract_features_11to12(dp_type:str, question:str,docID_DBOtype_dict:Dict,es = Elasticsearch(),index="dbpdiea_type_centric",smoothing_param=2000,k1=1.2,b=0.75,mode="Dirichlet")->Dict:
+def extract_features_11to12(dp_type:str, question:str,docID_DBOtype_dict:Dict,
+                            es:Elasticsearch,index="dbpdiea_type_centric",
+                            smoothing_param=2000,k1=1.2,b=0.75
+                            )->Dict:
     if not es.indices.exists(index):
         print(f'you need to index "dbpdiea_type_centric" dataset to elasticSearch')
         return None
@@ -137,7 +140,7 @@ def extract_features_11to12(dp_type:str, question:str,docID_DBOtype_dict:Dict,es
                 "TCLM_t_q": 0}
     field="abstract"
     return {"TCBM25_t_q": round(scorer_BM25(es, doc_id,question,index,field,k1,b),4),
-            "TCLM_t_q": round(scorer_LM(es, doc_id,question,index,field,smoothing_param,mode),4)}
+            "TCLM_t_q": round(scorer_LM(es, doc_id,question,index,field,smoothing_param),4)}
 
 
 # In[11]:
@@ -171,7 +174,7 @@ if __name__ == '__main__':
     index="dbpdiea_type_centric"
     dp_type="dbo:Place"
     question="When was Bibi Andersson married to Per Ahlmark very green?"
-    print(extract_features_11to12(dp_type, question,docID_DBOtype_dict))
+    print(extract_features_11to12(dp_type, question,docID_DBOtype_dict,es))
     
     #test with small dataset, to check the implementation is correct or not
     query="t3"
