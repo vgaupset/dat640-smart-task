@@ -16,6 +16,8 @@ from typing import Callable, Dict, List, Set, Tuple
 
 
 def extract_features_16(DBpedia_map_type_entities:Dict,dp_type:str)-> Dict[str, float]:
+    if dp_type not in DBpedia_map_type_entities.keys():
+        return {"ENTITIES_t": 0}
     return {"ENTITIES_t": len(DBpedia_map_type_entities[dp_type])}
 
 
@@ -27,5 +29,6 @@ if __name__ == '__main__':
         data = json.load(file)
     #data.keys()
     DBO_type='dbo:Disease'
+    DBO_type='dbo:NaturalEvent'
     print(extract_features_16(data,DBO_type))
 

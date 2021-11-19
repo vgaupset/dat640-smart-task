@@ -35,7 +35,11 @@ def scorer_LM(es: Elasticsearch, doc_id:str,query:str,index: str,field="abstract
      
     tv = es.termvectors(index=index, doc_type="_doc", id=doc_id, fields=field, term_statistics=True) 
     #print(tv)
-    collection_len=tv["term_vectors"][field]['field_statistics']['sum_ttf']  
+    #if field is empty string,return 0
+    try:
+        collection_len=tv["term_vectors"][field]['field_statistics']['sum_ttf']  
+    except KeyError:
+        return 0
 
     #abstract length/doc_length
     doc_len=0
@@ -72,17 +76,64 @@ def scorer_LM(es: Elasticsearch, doc_id:str,query:str,index: str,field="abstract
 # In[9]:
 
 
-def scorer_BM25(es: Elasticsearch, doc_id:str,query:str,index="dbpdiea_type_centric",field="abstract",k1=1.2,b=0.75)->float:
-    query_terms=produce_nGram_terms(1,query)
+# def scorer_BM25(es: Elasticsearch, doc_id:str,query:str,index="dbpdiea_type_centric",field="abstract",k1=1.2,b=0.75)->float:
+#     query_terms=produce_nGram_terms(1,query)
    
-    tv = es.termvectors(index=index, doc_type="_doc", id=doc_id, fields=field, term_statistics=True) 
+#     tv = es.termvectors(index=index, doc_type="_doc", id=doc_id, fields=field, term_statistics=True) 
+#     collection_len=tv["term_vectors"][field]['field_statistics']['sum_ttf']  
+#     #total number of entity in the collections
+#     doc_number=tv["term_vectors"][field]['field_statistics']['doc_count'] 
+#     #average document length
+#     avgdl=collection_len/doc_number
+
+#     #abstract length/doc_length
+#     doc_len=0
+#     for term_stat_dic in tv["term_vectors"][field]["terms"].values():
+#         doc_len+=term_stat_dic['term_freq'] 
+    
+#     doc_query_score=0
+#     for term in set(query_terms):
+#         try:
+#             #number of documents containing term t
+#             n_t=tv["term_vectors"][field]["terms"][term]["doc_freq"]
+#             idf_t=math.log(doc_number/n_t)
+#         except KeyError:
+#             continue
+            
+#         try:
+#             count_t_d=tv["term_vectors"][field]["terms"][term]["term_freq"]
+#         except KeyError:
+#             continue
+            
+#         term_score=count_t_d*(1+k1)*idf_t/(count_t_d+k1*(1-b+b*doc_len/avgdl))
+#         doc_query_score+=term_score 
+
+#     return round(doc_query_score,4)
+def get_collection_paramter(es: Elasticsearch,field="abstract",index="dbpdiea_type_centric"):
+    tv = es.termvectors(index=index, doc_type="_doc", id="10", fields=field, term_statistics=True) 
     collection_len=tv["term_vectors"][field]['field_statistics']['sum_ttf']  
     #total number of entity in the collections
     doc_number=tv["term_vectors"][field]['field_statistics']['doc_count'] 
     #average document length
     avgdl=collection_len/doc_number
+    return collection_len,doc_number,avgdl
+    
 
-    #abstract length/doc_length
+def scorer_BM25(es: Elasticsearch, doc_id:str,query:str,index="dbpdiea_type_centric",field="abstract",k1=1.2,b=0.75)->float:
+    query_terms=produce_nGram_terms(1,query)
+   
+    tv = es.termvectors(index=index, doc_type="_doc", id=doc_id, fields=field, term_statistics=True) 
+    #if field is empty string,return 0
+    try:
+        collection_len=tv["term_vectors"][field]['field_statistics']['sum_ttf']  
+    except KeyError:
+        return 0
+    #total number of entity in the collections
+    doc_number=tv["term_vectors"][field]['field_statistics']['doc_count'] 
+    #average document length
+    avgdl=collection_len/doc_number
+    #collection_len,doc_number,avgdl=get_collection_paramter(es,field,index)
+    #doc_length
     doc_len=0
     for term_stat_dic in tv["term_vectors"][field]["terms"].values():
         doc_len+=term_stat_dic['term_freq'] 
@@ -91,6 +142,7 @@ def scorer_BM25(es: Elasticsearch, doc_id:str,query:str,index="dbpdiea_type_cent
     for term in set(query_terms):
         try:
             #number of documents containing term t
+            
             n_t=tv["term_vectors"][field]["terms"][term]["doc_freq"]
             idf_t=math.log(doc_number/n_t)
         except KeyError:
@@ -105,7 +157,6 @@ def scorer_BM25(es: Elasticsearch, doc_id:str,query:str,index="dbpdiea_type_cent
         doc_query_score+=term_score 
 
     return round(doc_query_score,4)
-
 
 # In[10]:
 
@@ -135,7 +186,7 @@ def extract_features_11to12(dp_type:str, question:str,docID_DBOtype_dict:Dict,
         return None
     doc_id=docID_DBOtype_dict.get(dp_type,"not found")
     if doc_id=="not found" :
-        print("type not found in elasticSearch")
+        #print("type not found in elasticSearch")
         return {"TCBM25_t_q": 0,
                 "TCLM_t_q": 0}
     field="abstract"
@@ -173,17 +224,18 @@ if __name__ == '__main__':
     
     index="dbpdiea_type_centric"
     dp_type="dbo:Place"
+    dp_type="dbo:TimePeriod"
     question="When was Bibi Andersson married to Per Ahlmark very green?"
     print(extract_features_11to12(dp_type, question,docID_DBOtype_dict,es))
     
     #test with small dataset, to check the implementation is correct or not
-    query="t3"
-    index="toy_index"
-    field="body"
-    doc_id="d1"
-    doc = es.get(index=index, id=doc_id)
-    #print(doc)
-    print("BM25:",scorer_BM25(es, doc_id,query,index,field))
-    print("LM:",scorer_LM(es, doc_id,query,index,field))
+    # query="t3"
+    # index="toy_index"
+    # field="body"
+    # doc_id="d1"
+    # doc = es.get(index=index, id=doc_id)
+    # #print(doc)
+    # print("BM25:",scorer_BM25(es, doc_id,query,index,field))
+    # print("LM:",scorer_LM(es, doc_id,query,index,field))
 
 

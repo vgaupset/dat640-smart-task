@@ -20,6 +20,10 @@ def extract_features_1to5(DBpedia_map_type_entities:Dict,dp_type:str,
     if not es.indices.exists(index):
         print(f'you need to index "dbpedia_entity_centric" dataset to elasticSearch')
         return None
+    if dp_type not in DBpedia_map_type_entities.keys():
+        # ECBM25_t_q[f'ECBM25_t_q_{k}']=0
+        return {f'ECBM25_t_q_{k}':0 for k in k_list}
+    
     ECBM25_t_q={}
     for k in k_list:
         hits = es.search(index=index, q=query, _source=True, size=k )["hits"]["hits"]  
@@ -37,7 +41,7 @@ if __name__ == '__main__':
     with open(filepath, 'r',encoding='utf-8') as f:
         DBpedia_map_type_entities = json.load(f)
     print("------length:",len(DBpedia_map_type_entities))
-    dp_type="dbo:Place"
+    dp_type='dbo:NaturalEvent'
     question="When was Bibi Andersson married to Per Ahlmark very green?"
     es= Elasticsearch()
     scores=extract_features_1to5(DBpedia_map_type_entities,dp_type,question,es)

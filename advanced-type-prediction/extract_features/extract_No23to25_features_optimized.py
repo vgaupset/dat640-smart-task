@@ -86,14 +86,16 @@ def calc_pairwise_similarity(model_loaded,question_tagged:Dict,type_tagged:Dict)
     content words in the query and the type label
     """
     similarities=[]
+    #print("type_tagged,question_tagged:",type_tagged,question_tagged)
     for POS_tag,words in type_tagged.items():
         if POS_tag in question_tagged.keys():
             for word1 in words:
                 for word2 in question_tagged[POS_tag]:
                     try:
                         similarities.append(model_loaded.similarity(word1,word2))
-                    except KeyError:
-                        pass
+                    except KeyError as err:
+                        #print(f"Unexpected {err}, {type(err)}") 
+                        continue
     return similarities
 
 
@@ -105,11 +107,24 @@ def find_nearest_Euclidean(model_loaded,words:List)->str:
     find the centroid of the list of words based on 
     smallest Euclidean with the average value of this list of vectors
     """
-    vectors=[model_loaded[word] for word in words ]
+    #print("-----words:",words)
+    vectors=[]
+    word_available_in_model=[]
+    #do not consider the word which is not in model corpus
+    for word in words:
+        try:
+            vectors.append(model_loaded[word])
+            word_available_in_model.append(word)
+        except KeyError:
+            continue
+    #vectors=[model_loaded[word] for word in words ]
     vectors_avg=np.mean(vectors,axis=0)
     distances=[np.linalg.norm(vector-vectors_avg) for vector in vectors]
+    #print("word_available_in_model", word_available_in_model)
     #print(distances)  
-    return words[distances.index(min(distances))]
+    if len(distances)==0:
+        return ""
+    return word_available_in_model[distances.index(min(distances))]
 
 
 # In[55]:
@@ -120,12 +135,22 @@ def find_nearest_similarities(model_loaded,words:List)->str:
     find the centroid of the list of words based on 
     max cosine similarity with the average value of this list of vectors
     """
-    vectors=[model_loaded[word] for word in words ]
+    #vectors=[model_loaded[word] for word in words ]
+    vectors=[]
+    word_available_in_model=[]
+    for word in words:
+        try:
+            vectors.append(model_loaded[word])
+            word_available_in_model.append(word)
+        except KeyError:
+            continue
     vectors_avg=np.mean(vectors,axis=0)
     similarities=model_loaded.cosine_similarities(vectors_avg,vectors)
     similarities=list(similarities)
+    if len(similarities)==0:
+        return ""
     max_similarity=max(similarities)
-    return words[similarities.index(max_similarity)]
+    return word_available_in_model[similarities.index(max_similarity)]
 
 
 # In[56]:
@@ -147,12 +172,20 @@ def extract_features_23to25(model_loaded,dp_type:str, question:str, mode="Euclid
         question_centroid=find_nearest_similarities(model_loaded,question_content)
         type_centroid=find_nearest_similarities(model_loaded,type_content)
     #feature 23
-    sim_aggr=round(model_loaded.similarity(question_centroid, type_centroid),4)
+    if question_centroid=="" or type_centroid=="":
+        sim_aggr=0
+    else:
+        sim_aggr=round(model_loaded.similarity(question_centroid, type_centroid),4)
     
     pairwise_similarity=calc_pairwise_similarity(model_loaded,question_tagged,type_tagged)
     #feature 24,25
-    sim_max=max(pairwise_similarity)
-    sim_avg=round(sum(pairwise_similarity)/len(pairwise_similarity),4)
+    #if no the content words do not pair
+    if len(pairwise_similarity)==0:
+        sim_max=0
+        sim_avg=0
+    else:
+        sim_max=max(pairwise_similarity)
+        sim_avg=round(sum(pairwise_similarity)/len(pairwise_similarity),4)
     
     return {"SIMAGGR_t_q":sim_aggr,"SIMMAX_t_q":sim_max,"SIMAVG_t_q":sim_avg}
 
@@ -170,7 +203,12 @@ if __name__ == '__main__':
         model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
         
     dp_type="dbo:GreatMusicFestival"
+    dp_type="dbo:TheatreDirector"
+    dp_type="dbo:Religious"
+    dp_type="dbo:Gnetophytes"
     question="When was Bibi Andersson married to Per Ahlmark very green?"
+    question="What is the name of the opera based on Twelfth Night ?"
+    question="What is the name of the opera based on Twelfth Night ?"
     print(extract_features_23to25(model_loaded,dp_type, question))
     print(extract_features_23to25(model_loaded,dp_type, question, mode="similarities"))
 
