@@ -59,6 +59,13 @@ def extract_features_17to19(analyze,X,terms_corpus,data:List[Dict],dp_type:str,q
             idf.append(X[type_index,terms_corpus.index(term)])
         else:
             idf.append(0)
+            
+    if len(idf) == 0:
+        return {
+        "LENGTH_t":len(dp_type),
+        "IDFSUM_t":0,
+        "IDFAVG_t":0
+    }  
     return {
         #"LENGTH_t":len(corpus[type_index].split()),
         "LENGTH_t":len(dp_type),
@@ -107,7 +114,9 @@ if __name__ == '__main__':
     dp_type='dbo:MusicalWork'
     dp_type="dbo:MusicFestival"
     dp_type='dbo:NaturalEvent'
+    dp_type="dbo:Film"
     question="When was Bibi Andersson music festival married to Per Ahlmark very green?"
+    question="n/a"
     #features=extract_features_17to19(data,dp_type,question)
     analyze,X,terms_corpus=get_analyze(data)
     print(type(analyze))

@@ -70,10 +70,20 @@ def extract_features_20to22(dp_type:str, question:str)->Tuple[float,float,float]
     type_1_gram=produce_nGram_terms(1,dp_type_processed)
     type_2_gram=produce_nGram_terms(2,dp_type_processed)
     type_nouns=get_nouns(dp_type_processed)
+
     
-    feature20=jaccard_similarity(question_1_gram,type_1_gram)
-    feature21=jaccard_similarity(question_2_gram,type_2_gram)
-    feature22=jaccard_similarity(question_nouns,type_nouns)
+    try:
+        feature20=jaccard_similarity(question_1_gram,type_1_gram)
+    except:
+        feature20=0
+    try:
+        feature21=jaccard_similarity(question_2_gram,type_2_gram)
+    except:
+        feature21=0
+    try:
+        feature22=jaccard_similarity(question_nouns,type_nouns)
+    except:
+        feature22=0
     return {"JTERMS1_t_q": round(feature20,4), "JTERMS2_t_q": round(feature21,4),"JNOUNS_t_q":round(feature22,4)}
            
 
@@ -82,6 +92,8 @@ def extract_features_20to22(dp_type:str, question:str)->Tuple[float,float,float]
 
 if __name__ == '__main__':
     dp_type="dbo:MusicFestival"
+    dp_type="dbo:Single"
     question="When was Bibi Andersson music festival married to Per Ahlmark very green?"
+    question="What is it?"
     print(extract_features_20to22(dp_type, question))
 

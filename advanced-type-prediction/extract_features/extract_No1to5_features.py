@@ -5,13 +5,31 @@
 
 
 from elasticsearch import Elasticsearch
+import string,re
 from typing import Dict, List, Optional
 from collections import Counter
 import math,json
 
 
 # In[2]:
+def preprocess(doc: str) -> str:
+    """Preprocesses text to prepare it for feature extraction.
 
+    Args:
+        doc: String comprising the unprocessed contents of some email file.
+
+    Returns:
+        String comprising the corresponding preprocessed text.
+    """
+    re_html = re.compile("<[^>]+>")
+    doc = re_html.sub(" ", doc)
+    #remove pure digits 
+    doc=re.sub(r"(\b|\s+\-?|^\-?)(\d+|\d*\.\d+)\b","",doc)
+    # Replace punctuation marks (including hyphens) with spaces.
+    for c in string.punctuation:
+        doc = doc.replace(c, " ")
+    #return doc.lower()
+    return doc
 
 def extract_features_1to5(DBpedia_map_type_entities:Dict,dp_type:str,
                           query:str,es:Elasticsearch,
@@ -43,7 +61,10 @@ if __name__ == '__main__':
     print("------length:",len(DBpedia_map_type_entities))
     dp_type='dbo:NaturalEvent'
     question="When was Bibi Andersson married to Per Ahlmark very green?"
+    question="Who is {famous for} of {writers} of {To the Christian Nobility of the German Nation} ?"
     es= Elasticsearch()
+    question=preprocess(question)
+    print("------question:",question)
     scores=extract_features_1to5(DBpedia_map_type_entities,dp_type,question,es)
     print("------scores:",scores)
 
