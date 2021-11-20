@@ -6,6 +6,7 @@ import gensim.downloader as api
 import gensim
 from elasticsearch import Elasticsearch
 sys.path.insert(1, './advanced-type-prediction/extract_features')
+sys.path.insert(1, './advanced-type-prediction/util')
 from extract_No1to5_features_optimized import extract_features_1to5
 from extract_No11to12_features_optimized import extract_features_11to12
 from extract_No13to15_features import TypeTaxonomy, extract_features_13to15
@@ -87,6 +88,7 @@ def dump_results(results,results_path):
         json.dump(results, f)
 
 def type_prediction(train_path, test_path, types_path, results_path):
+    es = Elasticsearch()
     train_data = load_data(train_path)
     test_data = load_data(test_path)
     types = load_types(types_path)
