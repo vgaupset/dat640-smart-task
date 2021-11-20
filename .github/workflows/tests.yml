@@ -11,5 +11,6 @@ jobs:
           python-version: '3.x'
       - run: |
           pip install sklearn
+          pip install gensim
       - name: run tests
-        run: python3 ./baseline-category-prediction-2/category-prediction.py
+        run: python3 ./main.py
