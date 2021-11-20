@@ -8,8 +8,8 @@ instance_types_en.ttl
 short_abstracts_en.ttl
 
 DBpedia_map_type_entities-Copy1.ipynb
-# xaa
-# xaa_small_abs
+xaa
+xaa_small_abs
 DBpedia_map_entity_abstract.json
 DBpedia_map_type_entities.json
 
@@ -37,3 +37,7 @@ test_DBpedia_map_entity_abstract.json
 test_DBpedia_map_type_abstract.json
 test_DBpedia_map_type_entities.json
 
+prepare_training_data.ipynb
+prepare_training_data-optimized.ipynb
+names.csv
+indexer.log
