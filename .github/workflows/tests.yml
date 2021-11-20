@@ -13,5 +13,6 @@ jobs:
           pip install sklearn
           pip install gensim
           pip install nltk
+          pip install Elasticsearch
       - name: run tests
         run: python3 ./main.py
