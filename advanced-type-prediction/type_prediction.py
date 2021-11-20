@@ -87,8 +87,23 @@ def dump_results(results,results_path):
     with open(results_path, 'w+') as f:
         json.dump(results, f)
 
-def type_prediction(train_path, test_path, types_path, results_path):
-    es = Elasticsearch()
+def type_prediction(train_path, test_path, types_path, results_path, es = Elasticsearch()):
+    es.info()
+    with open("advanced-type-prediction/data/DBpedia_map_type_entities.json", 'r', encoding='utf-8') as file:
+        DBpedia_map_type_entities = json.load(file)
+    with open("advanced-type-prediction/data/training_types.json",encoding='utf-8') as json_file:
+        training_map_type_questions = json.load(json_file)
+    with open("advanced-type-prediction/data/ElasticSearch_map_type_docID.json", 'r',encoding='utf-8') as f:
+        docID_DBOtype_dict = json.load(f)
+    try:
+        model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
+    except:
+        model_loaded = api.load('word2vec-google-news-300')
+        model_loaded.save('googleNews.d2v')
+        model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
+
+    typeobj=TypeTaxonomy("data/dbpedia_types.tsv")
+    
     train_data = load_data(train_path)
     test_data = load_data(test_path)
     types = load_types(types_path)
@@ -104,7 +119,7 @@ def type_prediction(train_path, test_path, types_path, results_path):
                 train_types.append(1.0)
             else:
                 train_types.append(0.0)
-            features = extract_features(row['question'], type)
+            features = extract_features(row['question'], type, DBpedia_map_type_entities, docID_DBOtype_dict, typeobj, training_map_type_questions,model_loaded,es)
             train_features.append(features)
 
     test_features = []
