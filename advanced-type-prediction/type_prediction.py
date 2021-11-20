@@ -4,7 +4,10 @@ from typing import Callable, Dict, List, Set, Tuple
 from sklearn.ensemble import RandomForestRegressor
 import gensim.downloader as api
 import gensim
+from elasticsearch import Elasticsearch
 sys.path.insert(1, './advanced-type-prediction/extract_features')
+from extract_No1to5_features_optimized import extract_features_1to5
+from extract_No11to12_features_optimized import extract_features_11to12
 from extract_No13to15_features import TypeTaxonomy, extract_features_13to15
 from extract_No16_feature import extract_features_16
 from extract_No17to19_features import extract_features_17to19
