@@ -17,7 +17,7 @@ if __name__ == '__main__':
          "./smart-dataset/datasets/Wikidata/lcquad2_anstype_wikidata_train.json"],
         [path_to_test]
     )
-    type_hierarchy, max_depth = evaluate.load_type_hierarchy('smart-dataset\evaluation\dbpedia\dbpedia_types.tsv')
+    type_hierarchy, max_depth = evaluate.load_type_hierarchy('smart-dataset/evaluation/dbpedia/dbpedia_types.tsv')
     ground_truth = evaluate.load_ground_truth(path_to_test, type_hierarchy)
     system_output = evaluate.load_system_output('./category_results.json')
     print('Category results:')
