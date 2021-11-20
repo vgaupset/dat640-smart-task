@@ -1,5 +1,5 @@
 on:
-  workflow_dispatch:
+  push:
 jobs:
   tests:
     name: Tests
@@ -12,5 +12,6 @@ jobs:
       - run: |
           pip install sklearn
           pip install gensim
+          pip install nltk
       - name: run tests
         run: python3 ./main.py
