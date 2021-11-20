@@ -2,15 +2,19 @@ import sys, json, csv
 import types
 from typing import Callable, Dict, List, Set, Tuple
 from sklearn.ensemble import RandomForestRegressor
-# import gensim.downloader as api
-# import gensim
+import gensim.downloader as api
+import gensim
+from elasticsearch import Elasticsearch
 sys.path.insert(1, './advanced-type-prediction/extract_features')
-# from extract_No13to15_features import TypeTaxonomy, extract_features_13to15
-# from extract_No16_feature import extract_features_16
-# from extract_No17to19_features import extract_features_17to19
-# from extract_No20to22_features import extract_features_20to22
-# #from extract_No23to25_features import extract_features_23to25
-# from extract_No23to25_features_optimized import extract_features_23to25
+sys.path.insert(1, './advanced-type-prediction/util')
+from extract_No1to5_features_optimized import extract_features_1to5
+from extract_No11to12_features_optimized import extract_features_11to12
+from extract_No13to15_features import TypeTaxonomy, extract_features_13to15
+from extract_No16_feature import extract_features_16
+from extract_No17to19_features import extract_features_17to19
+from extract_No20to22_features import extract_features_20to22
+#from extract_No23to25_features import extract_features_23to25
+from extract_No23to25_features_optimized import extract_features_23to25
 
 
 def load_data(path):
@@ -28,18 +32,53 @@ def load_types(path):
 
     return types
 
-def extract_features(question, type):
-    # ft13to15 = extract_features_13to15(question, type)
-    # ft16 = extract_features_16(question, type)
-    # ft17to19 = extract_features_17to19(question, type)
-    # ft20to22 = extract_features_20to22(question, type)
-    # ft23to25 = extract_features_23to25(question, type)
-    # features = {**ft13to15, **ft16, **ft17to19, **ft20to22, **ft23to25}.values()
-    features =[0]*10
-    if type == "dbo:Place" and "place" in question:
-        features[1] = 1.2
+def extract_features(
+    question:str,
+    dp_type: str,
+    DBpedia_map_type_entities:Dict,
+    docID_DBOtype_dict:Dict,
+    typeobj:TypeTaxonomy,
+    training_map_type_questions:Dict,
+    model_loaded:gensim.models.keyedvectors.KeyedVectors,
+    es: Elasticsearch,
+    add_extra_features:bool=False
+) -> List[float]:
+    """Extracts features of a query and document pair.
 
-    return features
+        Args:
+            query: string.
+            dp_type: DBO type.
+            es: Elasticsearch object instance.
+
+        Returns:
+            List of extracted feature values in a fixed order.
+    """
+    features_1to5 = extract_features_1to5(DBpedia_map_type_entities,dp_type,question,es)
+    feature_vect = list(features_1to5.values())
+
+    features_11to12 = extract_features_11to12(dp_type, question,docID_DBOtype_dict,es)
+    feature_vect.extend(list(features_11to12.values()))
+
+    features_13to15 = extract_features_13to15(typeobj,dp_type)
+    feature_vect.extend(list(features_13to15.values()))
+    
+    features_16=extract_features_16(DBpedia_map_type_entities,dp_type)
+    feature_vect.extend(list(features_16.values()))
+    
+    features_17to19=extract_features_17to19(training_map_type_questions,dp_type,question)
+    feature_vect.extend(list(features_17to19.values()))
+    
+    features_20to22=extract_features_20to22(dp_type,question)
+    feature_vect.extend(list(features_20to22.values()))
+    
+    features_23to25=extract_features_23to25(model_loaded,dp_type, question, mode="Euclidean")
+    feature_vect.extend(list(features_23to25.values()))
+
+    if add_extra_features:
+        features_23to25_variant=extract_features_23to25(model_loaded,dp_type, question, mode="similarities")
+        feature_vect.extend(list(features_23to25_variant.values()))
+    
+    return feature_vect
 
 def train(X, y):
     return RandomForestRegressor().fit(X,y)
@@ -48,7 +87,23 @@ def dump_results(results,results_path):
     with open(results_path, 'w+') as f:
         json.dump(results, f)
 
-def type_prediction(train_path, test_path, types_path, results_path):
+def type_prediction(train_path, test_path, types_path, results_path, es = Elasticsearch()):
+    es.info()
+    with open("advanced-type-prediction/data/DBpedia_map_type_entities.json", 'r', encoding='utf-8') as file:
+        DBpedia_map_type_entities = json.load(file)
+    with open("advanced-type-prediction/data/training_types.json",encoding='utf-8') as json_file:
+        training_map_type_questions = json.load(json_file)
+    with open("advanced-type-prediction/data/ElasticSearch_map_type_docID.json", 'r',encoding='utf-8') as f:
+        docID_DBOtype_dict = json.load(f)
+    try:
+        model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
+    except:
+        model_loaded = api.load('word2vec-google-news-300')
+        model_loaded.save('googleNews.d2v')
+        model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
+
+    typeobj=TypeTaxonomy("data/dbpedia_types.tsv")
+    
     train_data = load_data(train_path)
     test_data = load_data(test_path)
     types = load_types(types_path)
@@ -64,7 +119,7 @@ def type_prediction(train_path, test_path, types_path, results_path):
                 train_types.append(1.0)
             else:
                 train_types.append(0.0)
-            features = extract_features(row['question'], type)
+            features = extract_features(row['question'], type, DBpedia_map_type_entities, docID_DBOtype_dict, typeobj, training_map_type_questions,model_loaded,es)
             train_features.append(features)
 
     test_features = []
