@@ -5,31 +5,15 @@
 
 
 from elasticsearch import Elasticsearch
-import string,re
+import string,re,sys
 from typing import Dict, List, Optional
 from collections import Counter
 import math,json
+sys.path.insert(0, '../util')
+from helper_function import preprocess
 
 
-# In[2]:
-def preprocess(doc: str) -> str:
-    """Preprocesses text to prepare it for feature extraction.
 
-    Args:
-        doc: String comprising the unprocessed contents of some email file.
-
-    Returns:
-        String comprising the corresponding preprocessed text.
-    """
-    re_html = re.compile("<[^>]+>")
-    doc = re_html.sub(" ", doc)
-    #remove pure digits 
-    doc=re.sub(r"(\b|\s+\-?|^\-?)(\d+|\d*\.\d+)\b","",doc)
-    # Replace punctuation marks (including hyphens) with spaces.
-    for c in string.punctuation:
-        doc = doc.replace(c, " ")
-    #return doc.lower()
-    return doc
 
 def extract_features_1to5(DBpedia_map_type_entities:Dict,dp_type:str,
                           query:str,es:Elasticsearch,
@@ -59,9 +43,10 @@ if __name__ == '__main__':
     with open(filepath, 'r',encoding='utf-8') as f:
         DBpedia_map_type_entities = json.load(f)
     print("------length:",len(DBpedia_map_type_entities))
-    dp_type='dbo:NaturalEvent'
+    dp_type="dbo:Place"
+    #dp_type='dbo:NaturalEvent'
     question="When was Bibi Andersson married to Per Ahlmark very green?"
-    question="Who is {famous for} of {writers} of {To the Christian Nobility of the German Nation} ?"
+    #question="Who is {famous for} of {writers} of {To the Christian Nobility of the German Nation} ?"
     es= Elasticsearch()
     question=preprocess(question)
     print("------question:",question)

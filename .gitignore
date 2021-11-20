@@ -37,4 +37,3 @@ test_DBpedia_map_entity_abstract.json
 test_DBpedia_map_type_abstract.json
 test_DBpedia_map_type_entities.json
 
-.csv

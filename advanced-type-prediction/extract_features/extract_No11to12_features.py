@@ -76,47 +76,6 @@ def scorer_LM(es: Elasticsearch, doc_id:str,query:str,index: str,field="abstract
 # In[9]:
 
 
-# def scorer_BM25(es: Elasticsearch, doc_id:str,query:str,index="dbpdiea_type_centric",field="abstract",k1=1.2,b=0.75)->float:
-#     query_terms=produce_nGram_terms(1,query)
-   
-#     tv = es.termvectors(index=index, doc_type="_doc", id=doc_id, fields=field, term_statistics=True) 
-#     collection_len=tv["term_vectors"][field]['field_statistics']['sum_ttf']  
-#     #total number of entity in the collections
-#     doc_number=tv["term_vectors"][field]['field_statistics']['doc_count'] 
-#     #average document length
-#     avgdl=collection_len/doc_number
-
-#     #abstract length/doc_length
-#     doc_len=0
-#     for term_stat_dic in tv["term_vectors"][field]["terms"].values():
-#         doc_len+=term_stat_dic['term_freq'] 
-    
-#     doc_query_score=0
-#     for term in set(query_terms):
-#         try:
-#             #number of documents containing term t
-#             n_t=tv["term_vectors"][field]["terms"][term]["doc_freq"]
-#             idf_t=math.log(doc_number/n_t)
-#         except KeyError:
-#             continue
-            
-#         try:
-#             count_t_d=tv["term_vectors"][field]["terms"][term]["term_freq"]
-#         except KeyError:
-#             continue
-            
-#         term_score=count_t_d*(1+k1)*idf_t/(count_t_d+k1*(1-b+b*doc_len/avgdl))
-#         doc_query_score+=term_score 
-
-#     return round(doc_query_score,4)
-def get_collection_paramter(es: Elasticsearch,field="abstract",index="dbpdiea_type_centric"):
-    tv = es.termvectors(index=index, doc_type="_doc", id="10", fields=field, term_statistics=True) 
-    collection_len=tv["term_vectors"][field]['field_statistics']['sum_ttf']  
-    #total number of entity in the collections
-    doc_number=tv["term_vectors"][field]['field_statistics']['doc_count'] 
-    #average document length
-    avgdl=collection_len/doc_number
-    return collection_len,doc_number,avgdl
     
 
 def scorer_BM25(es: Elasticsearch, doc_id:str,query:str,index="dbpdiea_type_centric",field="abstract",k1=1.2,b=0.75)->float:
@@ -205,22 +164,12 @@ if __name__ == '__main__':
 
 
     
-    try:
-        filepath="../data/ElasticSearch_map_type_docID.json"
-        with open(filepath, 'r',encoding='utf-8') as f:
-            docID_DBOtype_dict = json.load(f)
-        print("------length:",len(docID_DBOtype_dict))
-    except:
-        docID_DBOtype_dict=map_docID_DBOtype() 
-        filepath="../data/ElasticSearch_map_type_docID.json"
-        with open(filepath, 'w',encoding='utf-8') as f:
-            json.dump(docID_DBOtype_dict, f, ensure_ascii=False)
-        print("'test_ElasticSearch_map_type_docID.json' has been created")
-            
-        filepath="../data/ElasticSearch_map_type_docID.json"
-        with open(filepath, 'r',encoding='utf-8') as f:
-            docID_DBOtype_dict = json.load(f)
-        print("------length:",len(docID_DBOtype_dict))
+
+    filepath="../data/ElasticSearch_map_type_docID.json"
+    with open(filepath, 'r',encoding='utf-8') as f:
+        docID_DBOtype_dict = json.load(f)
+    print("------length:",len(docID_DBOtype_dict))
+
     
     index="dbpdiea_type_centric"
     dp_type="dbo:Place"
