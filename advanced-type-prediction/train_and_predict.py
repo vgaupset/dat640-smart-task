@@ -34,20 +34,7 @@ np.seterr(all="ignore")
 
 
 #load model
-try:
-    model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
-except:
-    model_loaded = api.load('word2vec-google-news-300')
-    model_loaded.save('googleNews.d2v')
-    model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
 
-
-# In[4]:
-
-
-filepath="data/training_types.json"
-with open(filepath,encoding='utf-8') as json_file:
-    training_map_type_questions = json.load(json_file)
 
 
 # In[5]:
@@ -91,7 +78,8 @@ def extract_features_type_label(
 # In[6]:
 
 
-def load_training_data(filepath="data/for_training_type_label.csv")-> Tuple[List[List[float]], List[int]]:
+def load_training_data(filepath)-> Tuple[List[List[float]], List[int]]:
+    print("----the training data is loading from:",filepath)
     X_train=[]
     y_train=[]
     file = open(filepath)
@@ -104,6 +92,8 @@ def load_training_data(filepath="data/for_training_type_label.csv")-> Tuple[List
             X_train.append([float(item) for item in line])
         else:
             y_train.append(int(line[0]))
+            
+    file.close()
 
     return X_train,y_train
 
@@ -158,9 +148,12 @@ def get_rankings(
     ltr: PointWiseLTRModel,
     training_map_type_questions:Dict[str,str],
     model_loaded:gensim.models.keyedvectors.KeyedVectors,
-    filepath_baseline="data/baseline_result.json",
-    filepath_testing="../smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json",
-    result_path="data/advanced_results.csv"
+    # filepath_baseline="data/baseline_result.json",
+    # filepath_testing="../smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json",
+    # result_path="data/advanced_results.csv"
+    filepath_baseline:str,
+    filepath_testing:str,
+    result_path:str
 ) -> Dict[str, List[str]]:
     """Generate rankings for each of the test query IDs.
 
@@ -187,6 +180,7 @@ def get_rankings(
     count=0
     print("-----------------",datetime.datetime.now())
     with open(result_path, 'w', newline='') as csvfile:
+        print("---------------result_path:",result_path)
         writer = csv.writer(csvfile)
 
         for entry in smarttask_dbpedia_test:
@@ -255,63 +249,64 @@ def get_rankings(
 
 # In[10]:
 
+if __name__ == '__main__':
+    filepath="data/training_types.json"
+    with open(filepath,encoding='utf-8') as json_file:
+        training_map_type_questions = json.load(json_file)
+        
+        
+    try:
+        model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
+    except:
+        model_loaded = api.load('word2vec-google-news-300')
+        model_loaded.save('googleNews.d2v')
+        model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
 
-try:
-    filename = 'data/finalized_model.sav'
-    ltr=PointWiseLTRModel()
-    ltr.model = pickle.load(open(filename, 'rb'))
-except:
-    filepath="data/for_training_type_label.csv"
-    X_train,y_train=load_training_data(filepath)
-    ltr=PointWiseLTRModel()
-    ltr._train(X_train,y_train)
-    print("finish training")
-    # save the model to disk
-    filename = 'data/finalized_model.sav'
-    pickle.dump(ltr.model, open(filename, 'wb'))
-    print("trained model has been saved")
-    # load the model from disk
-    ltr.model = pickle.load(open(filename, 'rb'))
-    print("trained model has been loaded")
+    
+    try:
+        filename = 'data/finalized_model.sav'
+        ltr=PointWiseLTRModel()
+        ltr.model = pickle.load(open(filename, 'rb'))
+    except:
+        filepath="data/for_training_type_label.csv"
+        X_train,y_train=load_training_data(filepath)
+        ltr=PointWiseLTRModel()
+        ltr._train(X_train,y_train)
+        print("finish training")
+        # save the model to disk
+        filename = 'data/finalized_model.sav'
+        pickle.dump(ltr.model, open(filename, 'wb'))
+        print("trained model has been saved")
+        # load the model from disk
+        ltr.model = pickle.load(open(filename, 'rb'))
+        print("trained model has been loaded")
+        
+        
+        
+
+# In[4]:
+
+
+
 
 
 # In[ ]:
 
-
-# #train the model
-# filepath="data/for_training_type_label.csv"
-# X_train,y_train=load_training_data(filepath)
-# ltr=PointWiseLTRModel()
-# ltr._train(X_train,y_train)
-# print("finish training")
-# # save the model to disk
-# filename = 'data/finalized_model.sav'
-# pickle.dump(ltr.model, open(filename, 'wb'))
-# print("trained model has been saved")
-# # load the model from disk
-# ltr.model = pickle.load(open(filename, 'rb'))
-# print("trained model has been loaded")
 
 
 # In[28]:
 
 
-#get predicted result
-test_rankings=get_rankings(ltr,
-    training_map_type_questions,
-    model_loaded)
-
-
-# In[ ]:
-
-
 
 
 
 # In[ ]:
 
 
-with open("data/advanced_result.json", 'w') as f:
-    json.dump(test_rankings, f)
-print("advanced_result.json")
+
+
+
+# In[ ]:
+
+
 
