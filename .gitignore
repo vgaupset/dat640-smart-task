@@ -39,5 +39,13 @@ test_DBpedia_map_type_entities.json
 
 prepare_training_data.ipynb
 prepare_training_data-optimized.ipynb
+prepare_training_data-optimized-2.ipynb
 names.csv
 indexer.log
+
+
+Knowledgebase_map_type_features_13to16.json
+ElasticSearch_map_docID_type.json
+DBpedia_map_docID_docLength.json
+
+finalized_model.sav
