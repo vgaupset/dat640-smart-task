@@ -1,16 +1,11 @@
 import sys, json, csv, pickle
 import types
 from typing import Callable, Dict, List, Set, Tuple
-#from sklearn.ensemble import RandomForestRegressor
 import gensim.downloader as api
 import gensim
 sys.path.insert(1, 'extract_features')
 sys.path.insert(1, 'util')
 import os.path
-# from helper_function import preprocess
-# from extract_No17to19_features import get_analyze,extract_features_17to19
-# from extract_No20to22_features import extract_features_20to22
-# from extract_No23to25_features_optimized import extract_features_23to25
 from train_and_predict import load_training_data,PointWiseLTRModel, get_rankings
 
 
