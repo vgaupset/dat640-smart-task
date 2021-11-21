@@ -51,3 +51,4 @@ DBpedia_map_docID_docLength.json
 finalized_model.sav
 training_types.json
 main_2.py
+for_training_type_label_alltypes.csv
