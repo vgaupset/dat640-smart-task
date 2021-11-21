@@ -1,10 +1,12 @@
 import sys,csv,json
 sys.path.insert(1, "./baseline-category-prediction-2")
 sys.path.insert(1, "./advanced-type-prediction")
+sys.path.insert(1, "./advanced-type-prediction/extract_features")
+sys.path.insert(1, "./advanced-type-prediction/util")
 sys.path.insert(1, "./smart-dataset/evaluation/dbpedia")
 
 from category_prediction import category_prediction
-# from type_prediction import type_prediction
+from type_prediction import type_prediction
 import evaluate
 
 def load_json_data(path):
@@ -52,6 +54,13 @@ if __name__ == '__main__':
     type_hierarchy, max_depth = evaluate.load_type_hierarchy('smart-dataset/evaluation/dbpedia/dbpedia_types.tsv')
     ground_truth = evaluate.load_ground_truth(path_to_test, type_hierarchy)
     system_output_category = evaluate.load_system_output('./category_results.json')
+
+    type_prediction(filepath_training_types="./advanced-type-prediction/data/training_types.json", 
+                    filename_trained_model = './advanced-type-prediction/data/finalized_model.sav', 
+                    filepath_for_train="./advanced-type-prediction/data/for_training_type_label_alltypes.csv", 
+                    filepath_baseline="./advanced-type-prediction/data/baseline_result.json",
+                    filepath_testing="./smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json",
+                    result_path="./advanced-type-prediction/data/advanced_results_2.csv")
 
     dump_baseline_results('./category_results.json','./advanced-type-prediction/data/baseline_result.json', './baseline_results.json')
     system_output_baseline = evaluate.load_system_output('./baseline_results.json')
