@@ -75,9 +75,3 @@ if __name__ == '__main__':
     evaluate.evaluate(system_output_baseline, ground_truth, type_hierarchy, max_depth)
     print('\n\n\033[32mType Prediction - Advanced results:\033[0m')
     evaluate.evaluate(system_output_advanced, ground_truth, type_hierarchy, max_depth)
-
-
-    # type_prediction("smart-dataset/datasets/DBpedia/smarttask_dbpedia_train.json","./category_results.json","./smart-dataset/evaluation/dbpedia/dbpedia_types.tsv", "./results.json")
-    # system_output = evaluate.load_system_output('./results.json')
-    # print('Type results:')
-    # evaluate.evaluate(system_output, ground_truth, type_hierarchy, max_depth)
