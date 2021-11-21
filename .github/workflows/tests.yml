@@ -16,8 +16,7 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      - if: steps.cache.outputs.cache-hit != 'true'
-        run: |
+      - run: |
           pip install sklearn
           pip install gensim
           pip install nltk
