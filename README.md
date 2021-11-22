@@ -6,8 +6,9 @@
    [instance_types_en.ttl](http://downloads.dbpedia.org/2016-10/core-i18n/en/instance_types_en.ttl.bz2).
 2. Extract these two files in the directory: `advanced-type-prediction/data`.
 3. Make sure the elasticsearch engine is running in your machine.
-4. Run `advanced-type-prediction/run_this_file_first.ipynb`. (This will generate the needed files and index 3 datasets into elasticsearch. )
-5. Run `main.py`.
+4. Change directory to `advanced-type-prediction` with `cd .\advanced-type-prediction\`.
+4. Run `run_this_file_first.ipynb`. (This will generate the needed files and index 3 datasets into elasticsearch. )
+5. Change directory to root folder with `cd ..` and run `main.py`.
 
 `Note:` If you want to check most of the file generated as well as the trained model. Please [download](https://liveuis-my.sharepoint.com/:u:/g/personal/261410_uis_no/EXvz-Q2g_HlNqGG8U1qTYkMBQwQexATC7-Gi946tXGjzfg) with password `111111`.
 
