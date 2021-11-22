@@ -60,7 +60,7 @@ if __name__ == '__main__':
                     filepath_for_train="./advanced-type-prediction/data/for_training_type_label_alltypes.csv", 
                     filepath_baseline="./advanced-type-prediction/data/baseline_result.json",
                     filepath_testing="./smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json",
-                    result_path="./advanced-type-prediction/data/advanced_results_2.csv")
+                    result_path="./advanced-type-prediction/data/advanced_results_3.csv")
 
     dump_baseline_results('./category_results.json','./advanced-type-prediction/data/baseline_result.json', './baseline_results.json')
     system_output_baseline = evaluate.load_system_output('./baseline_results.json')
