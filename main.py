@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     dump_baseline_results('./category_results.json','./advanced-type-prediction/data/baseline_result.json', './baseline_results.json')
     system_output_baseline = evaluate.load_system_output('./baseline_results.json')
-    dump_advanced_results('./baseline_results.json','./advanced-type-prediction/data/advanced_results_2.csv', './advanced_results.json')
+    dump_advanced_results('./baseline_results.json','./advanced-type-prediction/data/advanced_results_3.csv', './advanced_results.json')
     system_output_advanced = evaluate.load_system_output('./advanced_results.json')
 
 
