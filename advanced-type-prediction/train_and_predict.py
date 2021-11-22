@@ -12,6 +12,7 @@ import numpy as np
 import gensim.downloader as api
 import gensim
 import datetime
+from elasticsearch import Elasticsearch
 sys.path.insert(1, 'extract_features')
 sys.path.insert(1, 'util')
 from helper_function import preprocess
@@ -148,12 +149,10 @@ def get_rankings(
     ltr: PointWiseLTRModel,
     training_map_type_questions:Dict[str,str],
     model_loaded:gensim.models.keyedvectors.KeyedVectors,
-    # filepath_baseline="data/baseline_result.json",
-    # filepath_testing="../smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json",
-    # result_path="data/advanced_results.csv"
     filepath_baseline:str,
     filepath_testing:str,
-    result_path:str
+    result_path:str,
+    es: Elasticsearch
 ) -> Dict[str, List[str]]:
     """Generate rankings for each of the test query IDs.
 
@@ -205,7 +204,14 @@ def get_rankings(
                     print(f'{count} questions has been processed')
                 count+=1
 
-                baseline_result=map_testID_ranktype[entry['id']]
+                try:
+                    baseline_result=map_testID_ranktype[entry['id']]
+                except KeyError:
+                    question_processed=preprocess(entry['question'])                         
+                    hits = es.search(
+                        index="dbpdiea_type_centric", q=question_processed, _source=True, size=30
+                    )["hits"]["hits"]
+                    baseline_result= [hit['_source']["type"] for hit in hits]
                 
                 #print(len(baseline_result),baseline_result)
                 # Rerank the first-pass result set using the LTR model.

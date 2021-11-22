@@ -1,5 +1,6 @@
 import sys, json, csv, pickle
 import types
+from elasticsearch import Elasticsearch
 from typing import Callable, Dict, List, Set, Tuple
 import gensim.downloader as api
 import gensim
@@ -13,8 +14,9 @@ def type_prediction(filepath_training_types="data/training_types.json",
                     filename_trained_model = 'data/finalized_model.sav', 
                     filepath_for_train="data/for_training_type_label_alltypes.csv", 
                     filepath_baseline="data/baseline_result.json",
-                    filepath_testing="../smart-dataset/datasets/DBpedia/smarttask_dbpedia_test.json",
-                    result_path="data/advanced_results_2.csv"):
+                    filepath_testing='../category_results.json',
+                    result_path="data/advanced_results_3.csv",
+                    es=Elasticsearch(timeout=600)):
    
     
     if os.path.isfile(result_path):
@@ -54,7 +56,7 @@ def type_prediction(filepath_training_types="data/training_types.json",
                 model_loaded,
                 filepath_baseline,
                 filepath_testing,
-                result_path)
+                result_path,es)
                        
 
 if __name__ == '__main__':
