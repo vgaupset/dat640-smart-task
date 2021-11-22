@@ -181,6 +181,9 @@ def load_categories_multiple(paths: List[str]):
 
 
 def category_prediction(trainsets, testsets, results_path = './category_results.json'):
+    if os.path.isfile(results_path):
+        print(f'{results_path} is already exist' )
+        return None
     print("Loading data...")
     train_doc_ids, train_categories, train_docs = load_categories_multiple(trainsets)
     test_doc_ids, test_categories, test_docs = load_categories_multiple(testsets)
