@@ -55,3 +55,5 @@ for_training_type_label_alltypes.csv
 train_and_predict.ipynb
 advanced_results_2.csv
 main - Copy.py
+
+advanced-type-prediction/baseline_method.py
