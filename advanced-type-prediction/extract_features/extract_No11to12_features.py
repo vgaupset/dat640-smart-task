@@ -63,10 +63,7 @@ def scorer_LM(es: Elasticsearch, doc_id:str,query:str,index: str,field="abstract
        
         if count_t_d==0 and P_t_givenC==0:
             continue
-        #if mode=="Dirichlet":
         term_score=count_t_q*math.log((count_t_d+smoothing_param*P_t_givenC)/(doc_len+smoothing_param))
-        # if mode=="Jelinek-Mercer":
-        #     term_score=count_t_q*math.log((1-smoothing_param)*count_t_d/doc_len+smoothing_param*P_t_givenC)
         doc_query_score+=term_score
             
         

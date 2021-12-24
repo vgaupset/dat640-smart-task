@@ -27,7 +27,7 @@ if __name__ == '__main__':
     filepath="../data/DBpedia_map_type_entities.json"
     with open(filepath, 'r', encoding='utf-8') as file:
         data = json.load(file)
-    #data.keys()
+        
     DBO_type='dbo:Disease'
     DBO_type='dbo:NaturalEvent'
     print(extract_features_16(data,DBO_type))

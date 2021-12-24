@@ -37,19 +37,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 
 # In[6]:
-
-
-#https://stackoverflow.com/questions/57507832/unable-to-allocate-array-with-shape-and-data-type
-#model_loaded.save('googleNews.d2v')
-#model_loaded = gensim.models.keyedvectors.KeyedVectors.load('googleNews.d2v')
-
-
 # In[7]:
-
-
-# CONTENT_WORD_TYPE=["noun","adj","verb","adv"]
-# POS_TAGS=["NN","JJ","VB","RB"]
-
 
 # In[8]:
 

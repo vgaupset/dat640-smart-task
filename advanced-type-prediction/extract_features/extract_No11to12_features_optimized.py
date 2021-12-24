@@ -151,7 +151,6 @@ def extract_features_11to12(dp_type:str, query:str,docID_DBOtype_dict:Dict,
         return None
     doc_id=docID_DBOtype_dict.get(dp_type,"not found")
     if doc_id=="not found" :
-        #print("type not found in elasticSearch")
         return {"TCBM25_t_q": 0,
                 "TCLM_t_q": 0}
     field="abstract"
@@ -183,7 +182,6 @@ if __name__ == '__main__':
     index="dbpdiea_type_centric"
     collection_len,doc_number,avgdl=get_collection_paramter(es,field="abstract",index="dbpdiea_type_centric")
     dp_type="dbo:Place"
-    #dp_type="dbo:TimePeriod"
     question="When was Bibi Andersson married to Per Ahlmark very green?"
     print(extract_features_11to12(dp_type, question,docID_DBOtype_dict,map_docID_docLength,collection_len,doc_number,avgdl,es))
     
